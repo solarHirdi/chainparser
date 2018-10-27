@@ -34,15 +34,18 @@ function ChainParser(db) {
   let timer;
   this.start = () => {
     timer = setTimeout(async function tick() {
-      const headBlockNum = await getHeadBlockNum();
-      const startBlockNum = dbOptions.findOne({name: 'checkedBlockNum'}).value + 1;
-      const diffBlockNum = headBlockNum - startBlockNum;
-      const maxRequestsCount = Number(CONFIG.PARSER_MAX_REQUESTS_COUNT)
-      const requestsCount = maxRequestsCount > diffBlockNum ? diffBlockNum : maxRequestsCount;
-      const endBlockNum = startBlockNum + requestsCount - 1;
-      const timeInterval = diffBlockNum < maxRequestsCount ? Number(CONFIG.PARSER_TIMEOUT) : 0;
-      if (diffBlockNum > 0) {
-        try {
+      let timeInterval = Number(CONFIG.PARSER_TIMEOUT);
+      try {
+        const headBlockNum = await getHeadBlockNum();
+        const startBlockNum = dbOptions.findOne({name: 'checkedBlockNum'}).value + 1;
+        const diffBlockNum = headBlockNum - startBlockNum;
+        const maxRequestsCount = Number(CONFIG.PARSER_MAX_REQUESTS_COUNT)
+        if (diffBlockNum > maxRequestsCount) {
+          timeInterval = 0;
+        }
+        const requestsCount = maxRequestsCount > diffBlockNum ? diffBlockNum : maxRequestsCount;
+        const endBlockNum = startBlockNum + requestsCount - 1;
+        if (diffBlockNum > 0) {
           const txs = await getTxs(startBlockNum, endBlockNum);
           dbTxs.insert(txs);
           dbOptions.findAndUpdate({name: 'checkedBlockNum'}, obj => (obj.value = endBlockNum));
@@ -51,9 +54,9 @@ function ChainParser(db) {
           if (count > dbMaxTxsCount) {
             dbTxs.chain().simplesort('$loki', {desc: true}).offset(dbMaxTxsCount).remove();
           }
-        } catch (e) {
-          console.error(e.message);
         }
+      } catch (e) {
+        console.error(e.message);
       }
       timer = setTimeout(tick, timeInterval);
     }, 0);
