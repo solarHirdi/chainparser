@@ -1,0 +1,22 @@
+{
+  "name": "vest-tx-stack",
+  "version": "1.0.0",
+  "description": "Node.js app to retreive last 20 txs from eos-based blockchain",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Arkadiy A.Davydov",
+  "license": "ISC",
+  "dependencies": {
+    "babel-eslint": "^10.0.1",
+    "cors": "^2.8.4",
+    "dotenv": "^6.1.0",
+    "eosjs": "^16.0.9",
+    "eslint": "^5.7.0",
+    "eslint-plugin-babel": "^5.2.1",
+    "eslint-plugin-import": "^2.14.0",
+    "express": "^4.16.4",
+    "lokijs": "^1.5.5"
+  }
+}
