@@ -24,7 +24,13 @@ async function getTxs(startblockNum, endBlockNum) {
     promises.push(eos.getBlock(i));
   }
   const blocks = await Promise.all(promises);
-  blocks.sort((a, b) => a.block_num - b.block_num).forEach(block => block.transactions.forEach(tx => txs.push(tx)));
+  blocks
+    .sort((a, b) => a.block_num - b.block_num)
+    .forEach(block => block.transactions.forEach(tx => txs.push({
+      ...tx,
+      block_num: block.block_num,
+      trx: typeof tx.trx === 'string' ? {id: tx.trx} : tx.trx
+    })));
   return txs;
 }
 
